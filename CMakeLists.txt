@@ -17,7 +17,7 @@ find_package(Vulkan REQUIRED)
 add_subdirectory(lib/glfw-3.4)
 
 # Add source to this project's executable.
-add_executable (VulkanRenderer "VulkanRenderer.cpp" "VulkanRenderer.h")
+add_executable (VulkanRenderer "VulkanRenderer.cpp" "VulkanRenderer.h"  )
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET VulkanRenderer PROPERTY CXX_STANDARD 20)
