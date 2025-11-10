@@ -262,7 +262,7 @@ private:
 		createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR; // specifies ignoring alpha channel
 		createInfo.presentMode = presentMode;
 		createInfo.clipped = VK_TRUE;
-		createInfo.oldSwapchain = VK_NULL_HANDLE; // when swapchaing becomes invalid, e.g. due to resizing
+		// createInfo.oldSwapchain = VK_NULL_HANDLE; // when swapchaing becomes invalid, e.g. due to resizing
 
 		if (vkCreateSwapchainKHR(device, &createInfo, nullptr, &swapChain) != VK_SUCCESS) {
 			throw std::runtime_error("failed to create swap chain!");
@@ -286,7 +286,15 @@ private:
 	}
 
 	void recreateSwapChain() {
+		int width = 0, height = 0;
+		glfwGetFramebufferSize(window, &width, &height);
+		while (width == 0 || height == 0) {
+			glfwGetFramebufferSize(window, &width, &height);
+			glfwWaitEvents();
+		}
 		vkDeviceWaitIdle(device);
+
+		cleanupSwapChain();
 
 		createSwapChain();
 		createImageViews();
