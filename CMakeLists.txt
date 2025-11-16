@@ -1,6 +1,4 @@
-﻿# CMakeList.txt : CMake project for VulkanRenderer, include source and define
-# project specific logic here.
-#
+﻿# CMakeList.txt : CMake project for VulkanRenderer
 cmake_minimum_required (VERSION 3.8)
 
 # Enable Hot Reload for MSVC compilers if supported.
@@ -13,11 +11,11 @@ project ("VulkanRenderer")
 
 set(CMAKE_CXX_STANDARD 17)
 find_package(Vulkan REQUIRED)
+find_package(glm CONFIG REQUIRED)
 
 add_subdirectory(lib/glfw-3.4)
 
-# Add source to this project's executable.
-add_executable (VulkanRenderer "VulkanRenderer.cpp" "VulkanRenderer.h"  )
+add_executable (VulkanRenderer "VulkanRenderer.cpp" "VulkanRenderer.h"   "main.cpp")
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET VulkanRenderer PROPERTY CXX_STANDARD 20)
@@ -28,4 +26,5 @@ target_link_libraries(${PROJECT_NAME}
     PRIVATE
         Vulkan::Vulkan
         glfw
+        glm::glm
 )
