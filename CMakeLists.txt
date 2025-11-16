@@ -9,9 +9,18 @@ endif()
 
 project ("VulkanRenderer")
 
+include(FetchContent)
+
+FetchContent_Declare(
+    glm
+    GIT_REPOSITORY https://github.com/g-truc/glm.git
+    GIT_TAG master
+)
+
+FetchContent_MakeAvailable(glm)
+
 set(CMAKE_CXX_STANDARD 17)
 find_package(Vulkan REQUIRED)
-find_package(glm CONFIG REQUIRED)
 
 add_subdirectory(lib/glfw-3.4)
 

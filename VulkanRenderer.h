@@ -86,6 +86,7 @@ class VulkanRendererApp {
 		VkPipeline graphicsPipeline;
 		VkCommandPool commandPool;
 		std::vector<VkCommandBuffer> commandBuffers; // one per each in-flight frame
+		VkBuffer vertexBuffer;
 		std::vector<VkSemaphore> imageAvailableSemaphores; // one per each swapchain image
 		std::vector<VkSemaphore> renderFinishedSemaphores; // one per each in-flight frame
 		std::vector<VkFence> inFlightFences; // one per each in-flight frame
@@ -294,6 +295,7 @@ class VulkanRendererApp {
 		VkShaderModule createShaderModule(const std::vector<char>& code);
 		void createFramebuffers();
 		void createCommandPool();
+		void createVertexBuffer();
 		void createCommandBuffers();
 		void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
 		void drawFrame();
