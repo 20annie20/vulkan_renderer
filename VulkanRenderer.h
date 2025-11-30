@@ -336,7 +336,9 @@ class VulkanRendererApp {
 		VkShaderModule createShaderModule(const std::vector<char>& code);
 		void createFramebuffers();
 		void createCommandPool();
+		void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory);
 		void createVertexBuffer();
+		void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
 		void createCommandBuffers();
 		void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
 		void drawFrame();
