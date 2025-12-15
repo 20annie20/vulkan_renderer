@@ -58,50 +58,24 @@ struct Vertex {
 };
 
 const std::vector<Vertex> vertices = {
-	{{0.0f, -0.25f}, {1.0f, 0.9f, 0.0f}},
+	{{0.0f, 0.0f}, {1.0f, 0.9f, 0.0f}},
+	{{0.5f, 0.0f}, {1.0f, 0.9f, 0.0f}},
 	{{0.25f, 0.25f}, {1.0f, 0.9f, 0.0f}},
-	{{-0.25f, 0.25f}, {1.0f, 0.9f, 0.0f}},
-
-	{{0.0f, -0.25f}, {1.0f, 0.9f, 0.0f}},
-	{{0.5f, -0.25f}, {1.0f, 0.9f, 0.0f}},
-	{{0.25f, 0.25f}, {1.0f, 0.9f, 0.0f}},
-
-	{{-0.5f, -0.25f}, {1.0f, 0.9f, 0.0f}},
-	{{0.0f, -0.25f}, {1.0f, 0.9f, 0.0f}},
-	{{-0.25f, 0.25f}, {1.0f, 0.9f, 0.0f}},
-
-	{{-0.5f, -0.25f}, {1.0f, 0.9f, 0.0f}},
-	{{-0.25f, -0.6f}, {1.0f, 0.9f, 0.0f}},
+	{{0.0f, 0.25f}, {1.0f, 0.9f, 0.0f}},
+	{{-0.25f, 0.0f}, {1.0f, 0.9f, 0.0f}},
 	{{-0.25f, -0.25f}, {1.0f, 0.9f, 0.0f}},
-
-	{{-0.5f, -0.6f}, {1.0f, 0.9f, 0.0f}},
-	{{-0.25f, -0.6f}, {1.0f, 0.9f, 0.0f}},
-	{{-0.5f, -0.25f}, {1.0f, 0.9f, 0.0f}},
-
-	{{-0.5f, -0.6f}, {1.0f, 0.9f, 0.0f}},
-	{{-0.375f, -0.65f}, {1.0f, 0.9f, 0.0f}},
-	{{-0.25f, -0.6f}, {1.0f, 0.9f, 0.0f}},
-
-	{{-0.25f, -0.6f}, {1.0f, 0.9f, 0.0f}},
-	{{-0.15f, -0.25f}, {1.0f, 0.9f, 0.0f}},
-	{{-0.25f, -0.25f}, {1.0f, 0.9f, 0.0f}},
-
-	{{-0.5f, -0.6f}, {1.0f, 0.9f, 0.0f}},
-	{{-0.5f, -0.25f}, {1.0f, 0.9f, 0.0f}},
-	{{-0.55f, -0.45f}, {1.0f, 0.9f, 0.0f}},
-
-	{{-0.52f, -0.46f}, {1.0f, 0.4f, 0.0f}},
-	{{-0.52f, -0.32f}, {1.0f, 0.4f, 0.0f}},
-	{{-0.7f, -0.39f}, {1.0f, 0.4f, 0.0f}},
-
-	{{-0.4f, -0.55f}, {0.2f, 0.1f, 0.0f}},
-	{{-0.37f, -0.45f}, {0.2f, 0.1f, 0.0f}},
-	{{-0.43f, -0.45f}, {0.2f, 0.1f, 0.0f}},
-
-	{{0.35f, -0.25f}, {1.0f, 0.9f, 0.0f}},
-	{{0.45f, -0.4f}, {1.0f, 0.9f, 0.0f}},
-	{{0.5f, -0.25f}, {1.0f, 0.9f, 0.0f}},
+	{{0.0f, -0.25f}, {1.0f, 0.9f, 0.0f}},
+	{{-0.5f, 0.0f}, {0.2f, 0.1f, 0.0f}}
 }; 
+
+const std::vector<uint16_t> indices = {
+	0, 1, 2,
+	0, 2, 3,
+	0, 3, 4,
+	0, 4, 5,
+	0, 5, 6,
+	4, 7, 5
+};
 
 class VulkanRendererApp {
 	public:
@@ -128,6 +102,8 @@ class VulkanRendererApp {
 		std::vector<VkCommandBuffer> commandBuffers; // one per each in-flight frame
 		VkBuffer vertexBuffer;
 		VkDeviceMemory vertexBufferMemory;
+		VkBuffer indexBuffer;
+		VkDeviceMemory indexBufferMemory;
 		std::vector<VkSemaphore> imageAvailableSemaphores; // one per each swapchain image
 		std::vector<VkSemaphore> renderFinishedSemaphores; // one per each in-flight frame
 		std::vector<VkFence> inFlightFences; // one per each in-flight frame
@@ -338,6 +314,7 @@ class VulkanRendererApp {
 		void createCommandPool();
 		void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory);
 		void createVertexBuffer();
+		void createIndexBuffer();
 		void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
 		void createCommandBuffers();
 		void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
