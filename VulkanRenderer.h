@@ -77,6 +77,12 @@ const std::vector<uint16_t> indices = {
 	4, 7, 5
 };
 
+struct UniformBufferObject {
+	glm::mat4 model;
+	glm::mat4 view;
+	glm::mat4 proj;
+};
+
 class VulkanRendererApp {
 	public:
 		void run();
@@ -96,6 +102,7 @@ class VulkanRendererApp {
 		VkFormat swapChainImageFormat;
 		VkExtent2D swapChainExtent;
 		VkRenderPass renderPass;
+		VkDescriptorSetLayout descriptorSetLayout;
 		VkPipelineLayout pipelineLayout;
 		VkPipeline graphicsPipeline;
 		VkCommandPool commandPool;
@@ -308,6 +315,7 @@ class VulkanRendererApp {
 
 		void createImageViews();
 		void createRenderPass();
+		void createDescriptorSetLayout();
 		void createGraphicsPipeline();
 		VkShaderModule createShaderModule(const std::vector<char>& code);
 		void createFramebuffers();
