@@ -88,6 +88,7 @@ void VulkanRendererApp::initVulkan() {
 	createCommandPool();
 	createVertexBuffer();
 	createIndexBuffer();
+	createUniformBuffers();
 	createCommandBuffers();
 	createSyncObjects();
 }
@@ -97,6 +98,8 @@ void VulkanRendererApp::cleanup() {
 		vkDestroySemaphore(device, renderFinishedSemaphores[i], nullptr);
 		vkDestroySemaphore(device, imageAvailableSemaphores[i], nullptr);
 		vkDestroyFence(device, inFlightFences[i], nullptr);
+		vkDestroyBuffer(device, uniformBuffers[i], nullptr);
+		vkFreeMemory(device, uniformBufferMemory[i], nullptr);
 	}
 	vkDestroyBuffer(device, indexBuffer, nullptr);
 	vkFreeMemory(device, indexBufferMemory, nullptr);
@@ -790,6 +793,10 @@ void VulkanRendererApp::drawFrame() {
 	vkResetCommandBuffer(commandBuffers[currentFrame], 0);
 	recordCommandBuffer(commandBuffers[currentFrame], imageIndex);
 
+
+	// Update the transformation matrix UBO
+	updateUniformBuffer(currentFrame);
+
 	// Submit the recorded command buffer
 	VkSubmitInfo submitInfo{};
 	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -869,4 +876,26 @@ void VulkanRendererApp::createDescriptorSetLayout() {
 	if (vkCreateDescriptorSetLayout(device, &layoutInfo, nullptr, &descriptorSetLayout) != VK_SUCCESS) {
 		throw std::runtime_error("Failed to create descriptor set layout!");
 	}
+}
+
+void VulkanRendererApp::createUniformBuffers() {
+	VkDeviceSize bufferSize = sizeof(UniformBufferObject); 
+	// resize vectors to num of frames
+	uniformBuffers.resize(MAX_FRAMES_IN_FLIGHT);
+	uniformBufferMemory.resize(MAX_FRAMES_IN_FLIGHT);
+	uniformBuffersMapped.resize(MAX_FRAMES_IN_FLIGHT);
+
+	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+		createBuffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+			uniformBuffers[i], uniformBufferMemory[i]);
+		vkMapMemory(device, uniformBufferMemory[i], 0, bufferSize, 0, &uniformBuffersMapped[i]);
+	}
+	// VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT - can be mapped using vkMapMemory
+	// VK_MEMORY_PROPERTY_HOST_COHERENT_BIT - host cache management commands vkFlushMappedMemoryRanges and vkInvalidateMappedMemoryRanges are not needed to manage availability and visibility on the host
+}
+
+void VulkanRendererApp::updateUniformBuffer(uint32_t currentFrame) {
+	UniformBufferObject ubo{};
+	Matrix::RotateInTime(ubo, swapChainExtent);
+	memcpy(uniformBuffersMapped[currentFrame], &ubo, sizeof(ubo));
 }

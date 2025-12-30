@@ -16,6 +16,8 @@
 #include <array>
 #include <algorithm>
 #include <glm/glm.hpp>
+#include "Structs.h"
+#include "Geometry.h"
 
 const std::vector<const char*> validationLayers = { "VK_LAYER_KHRONOS_validation" };
 const std::vector<const char*> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
@@ -77,12 +79,6 @@ const std::vector<uint16_t> indices = {
 	4, 7, 5
 };
 
-struct UniformBufferObject {
-	glm::mat4 model;
-	glm::mat4 view;
-	glm::mat4 proj;
-};
-
 class VulkanRendererApp {
 	public:
 		void run();
@@ -111,6 +107,10 @@ class VulkanRendererApp {
 		VkDeviceMemory vertexBufferMemory;
 		VkBuffer indexBuffer;
 		VkDeviceMemory indexBufferMemory;
+
+		std::vector<VkBuffer> uniformBuffers; // one per frame
+		std::vector<VkDeviceMemory> uniformBufferMemory; 
+		std::vector<void*> uniformBuffersMapped; 
 		std::vector<VkSemaphore> imageAvailableSemaphores; // one per each swapchain image
 		std::vector<VkSemaphore> renderFinishedSemaphores; // one per each in-flight frame
 		std::vector<VkFence> inFlightFences; // one per each in-flight frame
@@ -321,12 +321,14 @@ class VulkanRendererApp {
 		void createFramebuffers();
 		void createCommandPool();
 		void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory);
+		void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
 		void createVertexBuffer();
 		void createIndexBuffer();
-		void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
+		void createUniformBuffers();
 		void createCommandBuffers();
 		void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
 		void drawFrame();
+		void updateUniformBuffer(uint32_t currentFrame);
 		void createSyncObjects();
 		uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
 };
