@@ -89,6 +89,8 @@ void VulkanRendererApp::initVulkan() {
 	createVertexBuffer();
 	createIndexBuffer();
 	createUniformBuffers();
+	createDescriptorPool();
+	createDescriptorSets();
 	createCommandBuffers();
 	createSyncObjects();
 }
@@ -110,6 +112,7 @@ void VulkanRendererApp::cleanup() {
 	vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
 	vkDestroyRenderPass(device, renderPass, nullptr);
 	cleanupSwapChain();
+	vkDestroyDescriptorPool(device, descriptorPool, nullptr); // sets will get destroyed with it 
 	vkDestroyDescriptorSetLayout(device, descriptorSetLayout, nullptr);
 	vkDestroyDevice(device, nullptr);
 	if (enableValidationLayers) {
@@ -468,7 +471,7 @@ void VulkanRendererApp::createGraphicsPipeline() {
 	rasterizer.polygonMode = VK_POLYGON_MODE_FILL; // other modes require enabling a GPU feature
 	rasterizer.lineWidth = 1;
 	rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
-	rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;
+	rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE; // because of the Y-flip we did in the projection matrix
 	rasterizer.depthBiasEnable = VK_FALSE;
 
 	//multisampling
@@ -762,6 +765,9 @@ void VulkanRendererApp::recordCommandBuffer(VkCommandBuffer commandBuffer, uint3
 	vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
 	vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT16);
 
+	vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptorSets[currentFrame], 0, nullptr);
+	vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
+
 	//vkCmdDraw(commandBuffer, 3, 1, 0, 0); // vert count, inst count, first vert, first inst
 	vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
 	vkCmdEndRenderPass(commandBuffer);
@@ -898,4 +904,62 @@ void VulkanRendererApp::updateUniformBuffer(uint32_t currentFrame) {
 	UniformBufferObject ubo{};
 	Matrix::RotateInTime(ubo, swapChainExtent);
 	memcpy(uniformBuffersMapped[currentFrame], &ubo, sizeof(ubo));
+}
+
+void VulkanRendererApp::createDescriptorPool() {
+	VkDescriptorPoolSize poolSize{};
+	poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	poolSize.descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+
+	VkDescriptorPoolCreateInfo poolInfo{};
+	poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+	poolInfo.poolSizeCount = 1;
+	poolInfo.pPoolSizes = &poolSize;
+
+	poolInfo.maxSets = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+	poolInfo.flags = 0; // not touching the descriptor set after creating so no flags needed
+
+
+	if (vkCreateDescriptorPool(device, &poolInfo, nullptr, &descriptorPool) != VK_SUCCESS) {
+		throw std::runtime_error("failed to create descriptor pool!");
+	}
+}
+
+
+void VulkanRendererApp::createDescriptorSets() {
+	std::vector<VkDescriptorSetLayout> layouts(MAX_FRAMES_IN_FLIGHT, descriptorSetLayout);
+	VkDescriptorSetAllocateInfo allocInfo{};
+	allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+	allocInfo.descriptorPool = descriptorPool;
+
+	allocInfo.descriptorSetCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+	allocInfo.pSetLayouts = layouts.data();
+
+	descriptorSets.resize(MAX_FRAMES_IN_FLIGHT);
+	if (vkAllocateDescriptorSets(device, &allocInfo, descriptorSets.data()) != VK_SUCCESS) {
+		throw std::runtime_error("failed to allocate descriptor sets!");
+	}
+
+	// populating the descriptors
+	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+		VkDescriptorBufferInfo bufferInfo{};
+		bufferInfo.buffer = uniformBuffers[i];
+		bufferInfo.offset = 0;
+		bufferInfo.range = sizeof(UniformBufferObject);
+
+		VkWriteDescriptorSet descriptorWrite{};
+		descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		descriptorWrite.dstSet = descriptorSets[i];
+		descriptorWrite.dstBinding = 0;
+		descriptorWrite.dstArrayElement = 0;
+
+		descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		descriptorWrite.descriptorCount = 1;
+
+		descriptorWrite.pBufferInfo = &bufferInfo;
+		descriptorWrite.pImageInfo = nullptr;
+		descriptorWrite.pTexelBufferView = nullptr;
+
+		vkUpdateDescriptorSets(device, 1, &descriptorWrite, 0, nullptr);
+	}
 }

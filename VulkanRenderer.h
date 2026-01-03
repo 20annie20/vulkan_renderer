@@ -98,7 +98,11 @@ class VulkanRendererApp {
 		VkFormat swapChainImageFormat;
 		VkExtent2D swapChainExtent;
 		VkRenderPass renderPass;
+
 		VkDescriptorSetLayout descriptorSetLayout;
+		VkDescriptorPool descriptorPool;
+		std::vector<VkDescriptorSet> descriptorSets;
+
 		VkPipelineLayout pipelineLayout;
 		VkPipeline graphicsPipeline;
 		VkCommandPool commandPool;
@@ -316,6 +320,8 @@ class VulkanRendererApp {
 		void createImageViews();
 		void createRenderPass();
 		void createDescriptorSetLayout();
+		void createDescriptorPool();
+		void createDescriptorSets();
 		void createGraphicsPipeline();
 		VkShaderModule createShaderModule(const std::vector<char>& code);
 		void createFramebuffers();
