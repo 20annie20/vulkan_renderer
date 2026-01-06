@@ -1,5 +1,5 @@
 ﻿# CMakeList.txt : CMake project for VulkanRenderer
-cmake_minimum_required (VERSION 3.8)
+cmake_minimum_required (VERSION 3.12)
 
 # Enable Hot Reload for MSVC compilers if supported.
 if (POLICY CMP0141)
@@ -23,6 +23,7 @@ set(CMAKE_CXX_STANDARD 17)
 find_package(Vulkan REQUIRED)
 
 add_subdirectory(lib/glfw-3.4)
+include_directories(lib/stb)
 
 add_executable (VulkanRenderer "VulkanRenderer.cpp" "VulkanRenderer.h"   "main.cpp" "Geometry.h")
 
