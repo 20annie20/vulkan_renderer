@@ -10,3 +10,4 @@ This is the second duck, the vertex buffer duck:
 This is the third duck, the index buffer duck:
 <img width="800" height="860" alt="image" src="https://github.com/user-attachments/assets/2a5afb7e-6b20-4477-8ab3-c12a4a640898" />
 
+The fourth duck, image source: www.freepik.com:

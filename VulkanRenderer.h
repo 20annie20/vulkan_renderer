@@ -337,4 +337,5 @@ class VulkanRendererApp {
 		void updateUniformBuffer(uint32_t currentFrame);
 		void createSyncObjects();
 		uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
+		void createTextureImage();
 };
