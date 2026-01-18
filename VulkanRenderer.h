@@ -125,6 +125,9 @@ class VulkanRendererApp {
 		uint32_t swapChainImageCount = 0;
 		uint32_t currentFrame = 0;
 
+		VkImage textureImage;
+		VkDeviceMemory textureImageMemory;
+
 		struct QueueFamilyIndices {
 			std::optional<uint32_t> graphicsFamily;
 			std::optional<uint32_t> presentFamily;
@@ -338,4 +341,7 @@ class VulkanRendererApp {
 		void createSyncObjects();
 		uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
 		void createTextureImage();
+		void createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
+		VkCommandBuffer beginSingleTimeCommands();
+		void endSingleTimeCommands(VkCommandBuffer commandBuffer);
 };
