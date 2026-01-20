@@ -126,6 +126,7 @@ class VulkanRendererApp {
 		uint32_t currentFrame = 0;
 
 		VkImage textureImage;
+		VkImageView textureImageView;
 		VkDeviceMemory textureImageMemory;
 
 		struct QueueFamilyIndices {
@@ -346,4 +347,6 @@ class VulkanRendererApp {
 		void endSingleTimeCommands(VkCommandBuffer commandBuffer);
 		void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
 		void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
+		void createTextureImageView();
+		VkImageView createImageView(VkImage image, VkFormat format);
 };

@@ -89,6 +89,7 @@ void VulkanRendererApp::initVulkan() {
 	createFramebuffers();
 	createCommandPool();
 	createTextureImage(); // uses command buffers
+	createTextureImageView();
 	createVertexBuffer();
 	createIndexBuffer();
 	createUniformBuffers();
@@ -117,6 +118,7 @@ void VulkanRendererApp::cleanup() {
 	cleanupSwapChain();
 	vkDestroyDescriptorPool(device, descriptorPool, nullptr); // sets will get destroyed with it 
 	vkDestroyDescriptorSetLayout(device, descriptorSetLayout, nullptr);
+	vkDestroyImageView(device, textureImageView, nullptr);
 	vkDestroyImage(device, textureImage, nullptr);
 	vkFreeMemory(device, textureImageMemory, nullptr);
 	vkDestroyDevice(device, nullptr);
@@ -1140,4 +1142,27 @@ void VulkanRendererApp::copyBufferToImage(VkBuffer buffer, VkImage image, uint32
 	);
 
 	endSingleTimeCommands(commandBuffer);
+}
+
+void VulkanRendererApp::createTextureImageView() {
+	textureImageView = createImageView(textureImage, VK_FORMAT_R8G8B8A8_SRGB);
+}
+
+VkImageView VulkanRendererApp::createImageView(VkImage image, VkFormat format)
+{
+	VkImageViewCreateInfo viewInfo{};
+	viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+	viewInfo.image = textureImage;
+	viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+	viewInfo.format = VK_FORMAT_R8G8B8A8_SRGB;
+	viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	viewInfo.subresourceRange.baseMipLevel = 0;
+	viewInfo.subresourceRange.levelCount = 1;
+	viewInfo.subresourceRange.levelCount = 1;
+	viewInfo.subresourceRange.baseArrayLayer = 0;
+	viewInfo.subresourceRange.layerCount = 1;
+
+	if (vkCreateImageView(device, &viewInfo, nullptr, &textureImageView) != VK_SUCCESS) {
+		throw std::runtime_error("failed to create texture image view!");
+	}
 }
