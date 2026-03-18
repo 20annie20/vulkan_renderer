@@ -128,6 +128,7 @@ class VulkanRendererApp {
 		VkImage textureImage;
 		VkImageView textureImageView;
 		VkDeviceMemory textureImageMemory;
+		VkSampler textureSampler;
 
 		struct QueueFamilyIndices {
 			std::optional<uint32_t> graphicsFamily;
@@ -293,12 +294,13 @@ class VulkanRendererApp {
 				queueCreateInfos.push_back(queueCreateInfo);
 			}
 
-			VkPhysicalDeviceFeatures device_features{};
+			VkPhysicalDeviceFeatures deviceFeatures{};
+			deviceFeatures.samplerAnisotropy = VK_TRUE;
 			VkDeviceCreateInfo createInfo{};
 			createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
 			createInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size());
 			createInfo.pQueueCreateInfos = queueCreateInfos.data();
-			createInfo.pEnabledFeatures = &device_features;
+			createInfo.pEnabledFeatures = &deviceFeatures;
 
 
 			createInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size());
@@ -349,4 +351,5 @@ class VulkanRendererApp {
 		void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
 		void createTextureImageView();
 		VkImageView createImageView(VkImage image, VkFormat format);
+		void createTextureSampler();
 };

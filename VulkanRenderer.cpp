@@ -90,6 +90,7 @@ void VulkanRendererApp::initVulkan() {
 	createCommandPool();
 	createTextureImage(); // uses command buffers
 	createTextureImageView();
+	createTextureSampler();
 	createVertexBuffer();
 	createIndexBuffer();
 	createUniformBuffers();
@@ -118,6 +119,7 @@ void VulkanRendererApp::cleanup() {
 	cleanupSwapChain();
 	vkDestroyDescriptorPool(device, descriptorPool, nullptr); // sets will get destroyed with it 
 	vkDestroyDescriptorSetLayout(device, descriptorSetLayout, nullptr);
+	vkDestroySampler(device, textureSampler, nullptr);
 	vkDestroyImageView(device, textureImageView, nullptr);
 	vkDestroyImage(device, textureImage, nullptr);
 	vkFreeMemory(device, textureImageMemory, nullptr);
@@ -308,7 +310,11 @@ bool VulkanRendererApp::isDeviceSuitable(VkPhysicalDevice device) {
 		SwapChainSupportDetails swapChainSupport = querySwapChainSupport(device);
 		swapChainAdequate = !swapChainSupport.formats.empty() && !swapChainSupport.presentModes.empty();
 	}
-	return indices.isComplete() && extensionsSupported;
+
+	VkPhysicalDeviceFeatures supportedFeatures;
+	vkGetPhysicalDeviceFeatures(device, &supportedFeatures);
+
+	return indices.isComplete() && extensionsSupported && swapChainAdequate && supportedFeatures.samplerAnisotropy;
 }
 
 bool VulkanRendererApp::checkDeviceExtensionSupport(VkPhysicalDevice device) {
@@ -1164,5 +1170,36 @@ VkImageView VulkanRendererApp::createImageView(VkImage image, VkFormat format)
 
 	if (vkCreateImageView(device, &viewInfo, nullptr, &textureImageView) != VK_SUCCESS) {
 		throw std::runtime_error("failed to create texture image view!");
+	}
+}
+
+void VulkanRendererApp::createTextureSampler()
+{
+	VkSamplerCreateInfo samplerInfo{};
+	samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+	samplerInfo.magFilter = VK_FILTER_LINEAR; // how to interpolate texels
+	samplerInfo.minFilter = VK_FILTER_LINEAR;
+
+	samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+	samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+	samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+
+	VkPhysicalDeviceProperties properties{};
+	vkGetPhysicalDeviceProperties(physicalDevice, &properties);
+	samplerInfo.anisotropyEnable = VK_TRUE;
+	samplerInfo.maxAnisotropy = properties.limits.maxSamplerAnisotropy;
+	samplerInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
+	samplerInfo.unnormalizedCoordinates = VK_FALSE; // range 0,1 True would be the x,y range of texture
+
+	samplerInfo.compareEnable = VK_FALSE;
+	samplerInfo.compareOp = VK_COMPARE_OP_ALWAYS;
+
+	samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+	samplerInfo.mipLodBias = 0.0f;
+	samplerInfo.minLod = 0.0f;
+	samplerInfo.maxLod = 0.0f;
+
+	if (vkCreateSampler(device, &samplerInfo, nullptr, &textureSampler) != VK_SUCCESS) {
+		throw std::runtime_error("failed to create texture sampler!");
 	}
 }
